@@ -8,7 +8,9 @@ setwd("~/workspace/Election Predictor")
 
 #### Electoral Votes
 
-votes_map_html <- read_html("https://www.realclearpolitics.com/epolls/2020/president/2020_elections_electoral_college_map.html")
+votes_map_html <- read_html(
+  "https://www.realclearpolitics.com/epolls/2020/president/2020_elections_electoral_college_map.html"
+  )
 
 Toss_ups <- votes_map_html %>% 
   str_extract_all('(?<=<span class="full">)(.*?)(?=</span>)') %>% 
@@ -52,8 +54,7 @@ Summary_2020 <- Summary_2020 %>%
   unlist() %>% 
   unique()
 
-Summary_2020 <- Summary_2020[str_detect(Summary_2020, 
-                                        "trump_vs_biden")]
+Summary_2020 <- Summary_2020[str_detect(Summary_2020, "trump_vs_biden")]
 
 Summary_2020 <- Summary_2020 %>% 
   str_replace_all("/epolls/2020/president/", "") %>% 
@@ -292,11 +293,11 @@ rm(National_2016)
 
 #### Build the forecast model
 
-dataset <- Electoral_Votes %>% 
+forecast_data <- Electoral_Votes %>% 
   left_join(State_Summary_2016) %>% 
   left_join(State_Summary_2020)
 
-dataset <- dataset %>% mutate(
+forecast_data <- forecast_data %>% mutate(
   National_Adj = National_Spread_2020_Current - National_Spread_2016_Average,
   National_SD = National_Sd_2020,
   Spread = case_when(
@@ -325,20 +326,20 @@ Dist <- list(
 dist_multiplier <- rJohnson(n, Dist)
 
 for(i in 1:54){
-  results_matrix[i, ] <- dataset[i, 9] + dist_multiplier*dataset[i, 10]
+  results_matrix[i, ] <- forecast_data[i, 9] + dist_multiplier*forecast_data[i, 10]
 }
 
 trump_wins <- ifelse(results_matrix > 0, 1, 0)
 trump_state_probs <- apply(trump_wins, 1, sum)/n
-dataset$Trump_Prob <- trump_state_probs
+forecast_data$Trump_Prob <- trump_state_probs
 
 biden_wins <- ifelse(results_matrix < 0, 1, 0)
 biden_state_probs <- apply(biden_wins, 1, sum)/n
-dataset$Biden_Prob <- biden_state_probs
+forecast_data$Biden_Prob <- biden_state_probs
 
 votes <- matrix(Electoral_Votes$Votes, ncol = 1)
 
-for(i in 1:10000){
+for(i in 1:n){
   trump_wins[ ,i] <- trump_wins[ ,i] * votes
   biden_wins[ ,i] <- biden_wins[ ,i] * votes
 }
@@ -357,8 +358,6 @@ win_table <- results %>%
   tally() %>% 
   rename(Percent = n) %>% 
   mutate(Percent = Percent/n)
-
-
 
 results %>% 
   group_by(winner) %>% 
