@@ -10,7 +10,7 @@ setwd("~/workspace/Election Predictor")
 
 votes_map_html <- read_html(
   "https://www.realclearpolitics.com/epolls/2020/president/2020_elections_electoral_college_map.html"
-  )
+)
 
 Toss_ups <- votes_map_html %>% 
   str_extract_all('(?<=<span class="full">)(.*?)(?=</span>)') %>% 
@@ -21,10 +21,10 @@ Solid_States <- votes_map_html %>%
   html_table(fill = T)
 
 Electoral_Votes <- c(Toss_ups, 
-                    Solid_States[[16]][[1]],
-                    Solid_States[[16]][[2]],
-                    Solid_States[[17]][[1]],
-                    Solid_States[[17]][[2]])
+                     Solid_States[[16]][[1]],
+                     Solid_States[[16]][[2]],
+                     Solid_States[[17]][[1]],
+                     Solid_States[[17]][[2]])
 
 Electoral_Votes <- Electoral_Votes[str_detect(Electoral_Votes, " ")]
 
@@ -37,7 +37,7 @@ names(Electoral_Votes) <- c("State", "Votes")
 
 Electoral_Votes$Votes <- as.numeric(
   as.character(Electoral_Votes$Votes)
-  ) 
+) 
 
 rm(votes_map_html, Toss_ups, Solid_States)
 
@@ -47,7 +47,7 @@ rm(votes_map_html, Toss_ups, Solid_States)
 
 Summary_2020 <- read_html(
   "https://www.realclearpolitics.com/epolls/2020/president/2020_elections_electoral_college_map.html"
-  )
+)
 
 Summary_2020 <- Summary_2020 %>% 
   str_extract_all('(?<=href=")(.*?)(?=">)') %>% 
@@ -135,14 +135,14 @@ State_Summary_2020 <- State_Polls_2020 %>%
   group_by(State) %>% 
   summarize(
     Spread_2020 = mean(Spread)
-    )
+  )
 
 # Calculate the SD for all state polls
 SD_2020 <- State_Polls_2020 %>% 
   group_by(State) %>% 
   summarize(
     Stdev_2020 = sd(Spread)
-    )
+  )
 
 # Combine Averages and Standard Deviation
 State_Summary_2020 <- State_Summary_2020 %>% 
@@ -305,7 +305,7 @@ forecast_data <- forecast_data %>% mutate(
     !is.na(Spread_2020) ~ (0.5*Spread_2020) + (0.5*(Spread_2016+National_Adj))
   ),
   Sd = case_when(
-    is.na(Stdev_2016) & (is.na(Stdev_2020)|is.nan(Stdev_2020)) ~ National_SD,
+    is.na(Stdev_2016) & (is.na(Stdev_2020)|is.nan(Stdev_2020)|Stdev_2020 == 0) ~ National_SD,
     !is.na(Stdev_2016) & (is.na(Stdev_2020)|is.nan(Stdev_2020)) ~ Stdev_2016,
     !is.na(Stdev_2016) & !(is.na(Stdev_2020)|is.nan(Stdev_2020)) ~ (0.5*Stdev_2020) + (0.5*Stdev_2016)
   )
