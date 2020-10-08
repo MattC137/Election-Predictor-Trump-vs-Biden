@@ -4,7 +4,7 @@ library(stringr)
 library(rvest)
 library(SuppDists)
 
-setwd("~/workspace/Election Predictor")
+# setwd("~/workspace/Election Predictor")
 
 #### Electoral Votes
 
