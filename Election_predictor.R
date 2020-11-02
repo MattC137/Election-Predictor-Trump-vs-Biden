@@ -89,9 +89,9 @@ State_Polls_2020_PA <- read_html(
   html_nodes("table") %>%
   html_table()
 
-State_Polls_2020_PA[[4]]
+State_Polls_2020_PA[[2]]
 
-rcp_average <- State_Polls_2020_PA[[4]][1,1]
+rcp_average <- State_Polls_2020_PA[[2]][1,1]
 
 State_Polls_2020 <- as.data.frame(matrix(NA, nrow = 0, ncol = 7))
 names(State_Polls_2020) <- c("Poll", "Date", "Sample", 
@@ -307,7 +307,8 @@ forecast_data <- forecast_data %>% mutate(
   Sd = case_when(
     is.na(Stdev_2016) & (is.na(Stdev_2020)|is.nan(Stdev_2020)|Stdev_2020 == 0) ~ National_SD,
     !is.na(Stdev_2016) & (is.na(Stdev_2020)|is.nan(Stdev_2020)) ~ Stdev_2016,
-    !is.na(Stdev_2016) & !(is.na(Stdev_2020)|is.nan(Stdev_2020)) ~ (0.5*Stdev_2020) + (0.5*Stdev_2016)
+    !is.na(Stdev_2016) & !(is.na(Stdev_2020)|is.nan(Stdev_2020)) ~ (0.5*Stdev_2020) + (0.5*Stdev_2016),
+    is.na(Stdev_2016) & !(is.na(Stdev_2020)|is.nan(Stdev_2020)) ~ (0.5*Stdev_2020) + (0.5*National_SD)
   )
 )
 
